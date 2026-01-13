@@ -23,10 +23,10 @@ Python-based RAG pipeline for regulatory sustainability documents (CSRD, GEG, EU
 - Metrics: Latency, chunk count, avg similarity score logged to CSV 
 
 ## Production-Oriented Insights
-- Index size: ~XX MB for 8–10 PDFs → scales locally but would need sharding/compression in Weaviate.
-- Latency: ~1–2s per query 
-- Relevance issues: High scores (0.92+) indicate moderate semantic match on dense legal text. Trade-off: stricter threshold → high factuality, but risk missing info. 
-- Redundancy: Many duplicate chunks from same page → added basic deduplication in ingestion.
+- Index size: ~388 MB for 8 PDFs after dedup and larger chunks. Local Chroma works well for prototype. 
+- Latency: ~1–2s average per query on Groq free tier (occasional spikes due to queue). Trade-off: fast inference vs. free-tier limits.
+- Relevance and Factuality: nitial semantic-only retrieval favored secondary reports; hybrid + metadata boost improved primary document recall. Strict prompt ensures high factuality but conservative answers when context is partial. Trade-off: stricter threshold → high factuality, but risk missing info. 
+- Redundancy: Many duplicate chunks from same page → added hash  deduplication in ingestion.
 - Compliance risks: Strict prompt prevents hallucinations but may give conservative answers when context is partial (as seen in demos).
 
 ## Demo Queries Results
