@@ -5,6 +5,7 @@ langchain-groq
 langchain-huggingface
 pypdf
 pandas
+rank-bm25
 matplotlib
 sentence-transformers
 chromadb

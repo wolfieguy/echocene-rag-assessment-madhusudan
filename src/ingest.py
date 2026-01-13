@@ -5,6 +5,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from dotenv import load_dotenv
+from langchain_core.documents import Document
 
 
 load_dotenv()
@@ -47,8 +48,8 @@ def ingest_documents(my_chunk_size=1200, overlap_buffer=300):
 
     
 
-    # Deduplicate chunks based on content hash
-    from langchain_core.documents import Document
+    # Removing duplicate chunks based on content hash
+    
     unique_chunks = [] # to hold deduplicated chunks
     seen = set() 
     for chunk in chunks:
@@ -66,7 +67,7 @@ def ingest_documents(my_chunk_size=1200, overlap_buffer=300):
         embedding=embeddings,
         persist_directory=CHROMA_DIR
     ) # creates a vector store from chunks
-    vectorstore.persist()  # Save to disk
+    #vectorstore.persist()  # Save to disk
     print(f"Vector store persisted at {CHROMA_DIR}.")  # log feedback
 
 
@@ -79,7 +80,6 @@ def ingest_documents(my_chunk_size=1200, overlap_buffer=300):
     print(f"Index size: {index_size_mb:.2f} MB")  # logs for README insights
 
 if __name__ == "__main__":
-    for size in [800, 1200]:
-        print(f"Ingesting with my_chunk_size={size} and overlap_buffer=200")
-        ingest_documents(my_chunk_size=size, overlap_buffer=200)  # moderate overlap 
+    print("Ingesting with my_chunk_size=1500 and overlap_buffer=400")
+    ingest_documents(my_chunk_size=1500, overlap_buffer=400)
     
