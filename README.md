@@ -8,25 +8,26 @@ Python-based RAG pipeline for regulatory sustainability documents (CSRD, GEG, EU
 2. `python -m venv venv && source venv/bin/activate`
 3. `pip install -r requirements.txt`
 4. Create `.env` with `GROQ_API_KEY=your_key_here`
-5. Download PDFs to `data/` (refer /data)
-6. `python src/ingest.py` → builds Chroma index (~XX MB)
-7. `python src/query_demo.py` → runs demo queries, logs to `logs/metrics.csv`
+5. Download PDFs to `data/` 
+6. `python src/ingest.py` -> builds Chroma index (~446 MB)
+7. `python src/query_demo.py` -> runs demo queries, logs to `logs/metrics.csv`
 
 ## Design Decisions & Optimizations
-- Chunking: RecursiveCharacterTextSplitter, size 800–1200, overlap 200–300. Tested both; 1200/300 better for long regulatory sections.
-- Embeddings: sentence-transformers/all-MiniLM-L6-v2 (fast, local, good baseline)
+- Chunking: RecursiveCharacterTextSplitter (tested 800/200 - 1500/400) -> Larger chunks (1500) better for long regulatory sections.
+- Embeddings: sentence-transformers/all-MiniLM-L6-v2 (fast, local, good baseline) -> Moderate semantic match on legal text (avg scores 0.6–0.9).
 - Vector DB: Chroma (local)
-- Retrieval: Top-k=8 with similarity_search_with_score → reliable float scores 
+- Retrieval: Top-k=8 with similarity_search_with_score -> reliable float scores 
 - LLM: Groq llama-3.1-8b-instant (low-latency, free tier)
-- Defensive prompting: Strict grounding + citation requirement + "Insufficient information" fallback → critical for compliance data
+- Retrieval: Hybrid-> BM25 keyword + semantic 
+- Defensive prompting: Strict grounding + citation requirement + "Insufficient information" fallback -> critical for compliance data
 - Hallucination mitigation: Post-check for citations in answer
 - Metrics: Latency, chunk count, avg similarity score logged to CSV 
 
 ## Production-Oriented Insights
-- Index size: ~388 MB for 8 PDFs after dedup and larger chunks. Local Chroma works well for prototype. 
+- Index size: ~446 MB for 8 PDFs after dedup and larger chunks. Local Chroma works well for prototype. 
 - Latency: ~1–2s average per query on Groq free tier (occasional spikes due to queue). Trade-off: fast inference vs. free-tier limits.
 - Relevance and Factuality: nitial semantic-only retrieval favored secondary reports; hybrid + metadata boost improved primary document recall. Strict prompt ensures high factuality but conservative answers when context is partial. Trade-off: stricter threshold → high factuality, but risk missing info. 
-- Redundancy: Many duplicate chunks from same page → added hash  deduplication in ingestion.
+- Redundancy: Many duplicate chunks from same page -> added hash  deduplication in ingestion.
 - Compliance risks: Strict prompt prevents hallucinations but may give conservative answers when context is partial (as seen in demos).
 
 ## Demo Queries Results
